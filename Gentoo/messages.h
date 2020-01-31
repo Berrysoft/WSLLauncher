@@ -44,13 +44,22 @@
 #define MSG_WSL_REGISTER_DISTRIBUTION_FAILED 0x000003E9L
 
 //
+// MessageId: MSG_WSL_UNREGISTER_DISTRIBUTION_FAILED
+//
+// MessageText:
+//
+// WslUnRegisterDistribution failed with error: 0x%1!x!
+//
+#define MSG_WSL_UNREGISTER_DISTRIBUTION_FAILED 0x000003EAL
+
+//
 // MessageId: MSG_WSL_CONFIGURE_DISTRIBUTION_FAILED
 //
 // MessageText:
 //
-// WslGetDistributionConfiguration failed with error: 0x%1!x!
+// WslConfigureDistribution failed with error: 0x%1!x!
 //
-#define MSG_WSL_CONFIGURE_DISTRIBUTION_FAILED 0x000003EAL
+#define MSG_WSL_CONFIGURE_DISTRIBUTION_FAILED 0x000003EBL
 
 //
 // MessageId: MSG_WSL_LAUNCH_INTERACTIVE_FAILED
@@ -59,7 +68,7 @@
 //
 // WslLaunchInteractive %1 failed with error: 0x%2!x!
 //
-#define MSG_WSL_LAUNCH_INTERACTIVE_FAILED 0x000003EBL
+#define MSG_WSL_LAUNCH_INTERACTIVE_FAILED 0x000003ECL
 
 //
 // MessageId: MSG_WSL_LAUNCH_FAILED
@@ -68,7 +77,7 @@
 //
 // WslLaunch %1 failed with error: 0x%2!x!
 //
-#define MSG_WSL_LAUNCH_FAILED            0x000003ECL
+#define MSG_WSL_LAUNCH_FAILED            0x000003EDL
 
 //
 // MessageId: MSG_USAGE
@@ -82,9 +91,12 @@
 //         Launches the user's default shell in the user's home directory.
 // 
 //     install [--root]
-//         Install the distribuiton and do not launch the shell when complete.
+//         Install the distribution and do not launch the shell when complete.
 //           --root
 //               Do not create a user account and leave the default user set to root.
+// 
+//     uninstall
+//         Uninstall the distribution.
 // 
 //     run <command line> 
 //         Run the provided command line in the current working directory. If no
@@ -99,7 +111,7 @@
 //     help 
 //         Print usage information.
 //
-#define MSG_USAGE                        0x000003EDL
+#define MSG_USAGE                        0x000003EEL
 
 //
 // MessageId: MSG_STATUS_INSTALLING
@@ -108,7 +120,7 @@
 //
 // Installing, this may take a few minutes...
 //
-#define MSG_STATUS_INSTALLING            0x000003EEL
+#define MSG_STATUS_INSTALLING            0x000003EFL
 
 //
 // MessageId: MSG_INSTALL_SUCCESS
@@ -117,7 +129,7 @@
 //
 // Installation successful!
 //
-#define MSG_INSTALL_SUCCESS              0x000003EFL
+#define MSG_INSTALL_SUCCESS              0x000003F0L
 
 //
 // MessageId: MSG_ERROR_CODE
@@ -126,7 +138,7 @@
 //
 // Error: 0x%1!x! %2
 //
-#define MSG_ERROR_CODE                   0x000003F0L
+#define MSG_ERROR_CODE                   0x000003F1L
 
 //
 // MessageId: MSG_ENTER_USERNAME
@@ -135,7 +147,7 @@
 //
 // Enter new UNIX username: %0
 //
-#define MSG_ENTER_USERNAME               0x000003F1L
+#define MSG_ENTER_USERNAME               0x000003F2L
 
 //
 // MessageId: MSG_CREATE_USER_PROMPT
@@ -145,7 +157,7 @@
 // Please create a default UNIX user account. The username does not need to match your Windows username.
 // For more information visit: https://aka.ms/wslusers
 //
-#define MSG_CREATE_USER_PROMPT           0x000003F2L
+#define MSG_CREATE_USER_PROMPT           0x000003F3L
 
 //
 // MessageId: MSG_PRESS_A_KEY
@@ -154,7 +166,7 @@
 //
 // Press any key to continue...
 //
-#define MSG_PRESS_A_KEY                  0x000003F3L
+#define MSG_PRESS_A_KEY                  0x000003F4L
 
 //
 // MessageId: MSG_MISSING_OPTIONAL_COMPONENT
@@ -164,7 +176,7 @@
 // The Windows Subsystem for Linux optional component is not enabled. Please enable it and try again.
 // See https://aka.ms/wslinstall for details.
 //
-#define MSG_MISSING_OPTIONAL_COMPONENT   0x000003F4L
+#define MSG_MISSING_OPTIONAL_COMPONENT   0x000003F5L
 
 //
 // MessageId: MSG_INSTALL_ALREADY_EXISTS
@@ -174,5 +186,5 @@
 // The distribution installation has become corrupted.
 // Please select Reset from App Settings or uninstall and reinstall the app.
 //
-#define MSG_INSTALL_ALREADY_EXISTS       0x000003F5L
+#define MSG_INSTALL_ALREADY_EXISTS       0x000003F6L
 

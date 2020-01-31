@@ -12,13 +12,12 @@
 #include "targetver.h"
 
 #include <Windows.h>
-#include <assert.h>
-#include <codecvt>
 #include <conio.h>
-#include <io.h>
+#include <iostream>
 #include <locale>
 #include <memory>
-#include <stdio.h>
+#include <optional>
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <tchar.h>

@@ -5,12 +5,7 @@
 
 #pragma once
 
-#define UID_INVALID ((ULONG)-1)
-
-namespace Helpers
-{
-    std::wstring GetUserInput(DWORD promptMsg, DWORD maxCharacters);
-    void PrintErrorMessage(HRESULT hr) noexcept;
-    void PrintMessage(DWORD messageId, ...) noexcept;
-    void PromptForInput() noexcept;
-} // namespace Helpers
+std::wstring GetUserInput(DWORD promptMsg, DWORD maxCharacters);
+void PrintErrorMessage(HRESULT hr) noexcept;
+void PrintMessage(DWORD messageId, ...) noexcept;
+void PromptForInput() noexcept;
