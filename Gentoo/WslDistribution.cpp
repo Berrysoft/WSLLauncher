@@ -10,12 +10,6 @@
 
 using namespace std;
 
-bool WslDistribution::IsOptionalComponentInstalled() noexcept
-{
-    wil::unique_hmodule wslApiDll{ LoadLibraryEx(L"wslapi.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32) };
-    return (bool)wslApiDll;
-}
-
 bool WslDistribution::IsRegistered() noexcept
 {
     return WslIsDistributionRegistered(m_name.c_str());

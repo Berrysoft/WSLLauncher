@@ -13,8 +13,6 @@ private:
     std::wstring m_name;
 
 public:
-    static bool IsOptionalComponentInstalled() noexcept;
-
     WslDistribution(std::wstring_view name) : m_name(name) {}
 
     bool IsRegistered() noexcept;

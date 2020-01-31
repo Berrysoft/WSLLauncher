@@ -8,6 +8,7 @@
 
 #include "Helpers.h"
 #include "WslDistribution.h"
+#include <delayimp.h>
 
 using namespace std;
 
@@ -33,6 +34,14 @@ constexpr wstring_view ARG_RUN_C = L"-c";
 
 WslDistribution distro(DistributionName);
 
+FARPROC WINAPI DelayLoadFailureHook(unsigned int, PDelayLoadInfo)
+{
+    PrintMessage(MSG_MISSING_OPTIONAL_COMPONENT);
+    exit(1);
+}
+
+ExternC const PfnDliHook __pfnDliFailureHook2 = DelayLoadFailureHook;
+
 int wmain(int argc, wchar_t const* argv[])
 {
     // Fix localization
@@ -44,17 +53,6 @@ int wmain(int argc, wchar_t const* argv[])
 
     // Initialize a vector of arguments.
     vector<wstring_view> arguments(argv + 1, argv + argc);
-
-    // Ensure that the Windows Subsystem for Linux optional component is installed.
-    if (!WslDistribution::IsOptionalComponentInstalled())
-    {
-        PrintMessage(MSG_MISSING_OPTIONAL_COMPONENT);
-        if (arguments.empty())
-        {
-            PromptForInput();
-        }
-        return 1;
-    }
 
     try
     {
