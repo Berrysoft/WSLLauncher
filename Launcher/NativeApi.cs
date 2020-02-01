@@ -15,7 +15,7 @@ namespace Launcher
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct SECURITY_ATTRIBUTES
+    internal struct SECURITY_ATTRIBUTES
     {
         public int nLength;
         public IntPtr lpSecurityDescriptor;
