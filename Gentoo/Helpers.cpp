@@ -10,27 +10,6 @@
 
 using namespace std;
 
-wstring GetUserInput(DWORD promptMsg, DWORD maxCharacters)
-{
-    PrintMessage(promptMsg);
-    size_t bufferSize = maxCharacters + 1;
-    unique_ptr<wchar_t[]> inputBuffer = make_unique<wchar_t[]>(bufferSize);
-    wstring input;
-    if (wcin.read(inputBuffer.get(), bufferSize))
-    {
-        input = inputBuffer.get();
-    }
-
-    // Throw away any additional chracters that did not fit in the buffer.
-    wchar_t wch;
-    do
-    {
-        wch = wcin.get();
-    } while ((wch != L'\n') && (wch != WEOF));
-
-    return input;
-}
-
 static wstring FormatMessageHelperVa(DWORD messageId, va_list vaList)
 {
     wil::unique_hlocal_string buffer;

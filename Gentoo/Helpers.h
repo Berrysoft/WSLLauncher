@@ -5,7 +5,6 @@
 
 #pragma once
 
-std::wstring GetUserInput(DWORD promptMsg, DWORD maxCharacters);
 void PrintErrorMessage(HRESULT hr) noexcept;
 void PrintMessage(DWORD messageId, ...) noexcept;
 void PromptForInput() noexcept;

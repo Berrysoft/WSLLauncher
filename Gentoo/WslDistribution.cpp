@@ -121,7 +121,7 @@ optional<ULONG> WslDistribution::QueryUid(wstring_view userName)
         // Query the UID of the supplied username.
         wstring command = L"/usr/bin/id -u ";
         command += userName;
-        wil::unique_handle child{ Launch(command.c_str(), true, GetStdHandle(STD_INPUT_HANDLE), writePipe.get(), GetStdHandle(STD_ERROR_HANDLE)) };
+        wil::unique_handle child{ Launch(command, true, GetStdHandle(STD_INPUT_HANDLE), writePipe.get(), GetStdHandle(STD_ERROR_HANDLE)) };
         // Wait for the child to exit and ensure process exited successfully.
         wil::handle_wait(child.get());
         DWORD exitCode;
@@ -154,6 +154,24 @@ void WslDistribution::SetDefaultUser(std::wstring_view userName)
     Configure(*uid, WSL_DISTRIBUTION_FLAGS_DEFAULT);
 }
 
+template <size_t N>
+static wstring GetUserInput(DWORD promptMsg)
+{
+    PrintMessage(promptMsg);
+    wchar_t inputBuffer[N + 1] = {};
+    auto count = wcin.readsome(inputBuffer, N);
+    inputBuffer[count] = L'\0';
+
+    // Throw away any additional chracters that did not fit in the buffer.
+    wchar_t wch;
+    do
+    {
+        wch = wcin.get();
+    } while ((wch != L'\n') && (wch != WEOF));
+
+    return inputBuffer;
+}
+
 void WslDistribution::Install(bool createUser)
 {
     // Register the distribution.
@@ -170,7 +188,7 @@ void WslDistribution::Install(bool createUser)
         wstring userName;
         do
         {
-            userName = GetUserInput(MSG_ENTER_USERNAME, 32);
+            userName = GetUserInput<32>(MSG_ENTER_USERNAME);
         } while (!CreateUser(userName));
 
         // Set this user account as the default.

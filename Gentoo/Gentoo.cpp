@@ -33,10 +33,15 @@ constexpr wstring_view ARG_RUN = L"run";
 constexpr wstring_view ARG_RUN_C = L"-c";
 
 WslDistribution distro(DistributionName);
+vector<wstring_view> arguments;
 
 FARPROC WINAPI DelayLoadFailureHook(unsigned int, PDelayLoadInfo)
 {
     PrintMessage(MSG_MISSING_OPTIONAL_COMPONENT);
+    if (arguments.empty())
+    {
+        PromptForInput();
+    }
     exit(1);
 }
 
@@ -52,7 +57,7 @@ int wmain(int argc, wchar_t const* argv[])
     SetConsoleTitle(WindowTitle.data());
 
     // Initialize a vector of arguments.
-    vector<wstring_view> arguments(argv + 1, argv + argc);
+    arguments.assign(argv + 1, argv + argc);
 
     try
     {
@@ -65,6 +70,10 @@ int wmain(int argc, wchar_t const* argv[])
             bool useRoot = ((installOnly) && (arguments.size() > 1) && (arguments[1] == ARG_INSTALL_ROOT));
             distro.Install(!useRoot);
             PrintMessage(MSG_INSTALL_SUCCESS);
+            if (arguments.empty())
+            {
+                PromptForInput();
+            }
             return 0;
         }
 
