@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
-using System.IO.Pipes;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
 using Microsoft.Win32.SafeHandles;
 
 namespace Launcher
@@ -94,6 +89,41 @@ namespace Launcher
             }
         }
 
+        private (uint DefaultUid, WSL_DISTRIBUTION_FLAGS Flags) GetConfigure()
+        {
+            try
+            {
+                NativeApi.WslGetDistributionConfiguration(Name, out _, out uint uid, out WSL_DISTRIBUTION_FLAGS flags, out _, out _);
+                return (uid, flags);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("WslGetDistributionConfiguration failed with error: 0x{0:X}", e.HResult);
+                throw;
+            }
+        }
+
+        public DistributionConfig Config
+        {
+            get
+            {
+                var (uid, flags) = GetConfigure();
+                return new DistributionConfig
+                {
+                    DefaultUid = uid,
+                    AppendPath = (flags & WSL_DISTRIBUTION_FLAGS.APPEND_NT_PATH) != 0,
+                    MountDrive = (flags & WSL_DISTRIBUTION_FLAGS.ENABLE_DRIVE_MOUNTING) != 0
+                };
+            }
+            set
+            {
+                WSL_DISTRIBUTION_FLAGS flags = WSL_DISTRIBUTION_FLAGS.ENABLE_INTEROP;
+                if (value.AppendPath) flags |= WSL_DISTRIBUTION_FLAGS.APPEND_NT_PATH;
+                if (value.MountDrive) flags |= WSL_DISTRIBUTION_FLAGS.ENABLE_DRIVE_MOUNTING;
+                Configure(value.DefaultUid, flags);
+            }
+        }
+
         private bool CreateUser(string username)
         {
             // Create the user account.
@@ -113,7 +143,7 @@ namespace Launcher
             return true;
         }
 
-        private unsafe uint QueryUid(string username)
+        public unsafe uint QueryUid(string username)
         {
             SECURITY_ATTRIBUTES sa = new SECURITY_ATTRIBUTES
             {
@@ -123,27 +153,21 @@ namespace Launcher
             };
             if (NativeApi.CreatePipe(out SafeFileHandle readPipe, out SafeFileHandle writePipe, ref sa, 0))
             {
-                var child = Launch("/usr/bin/id -u " + username, true, NativeApi.GetStdHandle(-10), writePipe, NativeApi.GetStdHandle(-12));
+                var child = Launch("/usr/bin/id -u " + username, true, NativeApi.GetStdHandle(NativeApi.STD_INPUT_HANDLE), writePipe, NativeApi.GetStdHandle(NativeApi.STD_ERROR_HANDLE));
                 NativeApi.WaitForSingleObject(child);
                 NativeApi.GetExitCodeProcess(child, out uint exitCode);
                 if (exitCode != 0)
                 {
                     throw new ArgumentException();
                 }
-                byte[] buffer = new byte[64];
                 using (var readStream = new FileStream(readPipe, FileAccess.Read))
+                using (var reader = new StreamReader(readStream))
                 {
-                    readStream.Read(buffer, 0, 64);
+                    string? line = reader.ReadLine();
+                    return line != null ? uint.Parse(line) : throw new ArgumentException();
                 }
-                return uint.Parse(Encoding.UTF8.GetString(buffer));
             }
             throw new IOException();
-        }
-
-        public void SetDefaultUser(string username)
-        {
-            uint uid = QueryUid(username);
-            Configure(uid, WSL_DISTRIBUTION_FLAGS.DEFAULT);
         }
 
         public void Install(string tarball, bool createUser)
@@ -168,7 +192,7 @@ namespace Launcher
                 } while (!CreateUser(username));
 
                 // Set this user account as the default.
-                SetDefaultUser(username);
+                Configure(QueryUid(username), WSL_DISTRIBUTION_FLAGS.DEFAULT);
             }
         }
 
@@ -184,5 +208,12 @@ namespace Launcher
                 throw;
             }
         }
+    }
+
+    struct DistributionConfig
+    {
+        public uint DefaultUid;
+        public bool AppendPath;
+        public bool MountDrive;
     }
 }

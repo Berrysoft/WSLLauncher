@@ -19,7 +19,7 @@ namespace Launcher
             {
                 return RunVerb(new RunVerb() { Login = true });
             }
-            return Parser.Default.ParseArguments<InstallVerb, UninstallVerb, ConfigVerb, RunVerb>(args).MapResult<IVerb, int>(RunVerb, RunError);
+            return Parser.Default.ParseArguments<InstallVerb, UninstallVerb, ConfigVerb, GetVerb, RunVerb>(args).MapResult<IVerb, int>(RunVerb, RunError);
         }
 
         static int RunVerb(IVerb verb)
@@ -91,12 +91,63 @@ namespace Launcher
     [Verb("config", HelpText = "Configure settings for this distribution.")]
     class ConfigVerb : IVerb
     {
-        [Option("default-user", HelpText = "Sets the default user. This must be an existing user.")]
-        public string DefaultUser { get; set; }
+        [Option("default-user", Group = "config", SetName = "username", HelpText = "Sets the default user. This must be an existing user.")]
+        public string? DefaultUser { get; set; }
+
+        [Option("default-uid", Group = "config", SetName = "uid", HelpText = "Sets the default user with uid. This must be an existing user.")]
+        public uint? DefaultUid { get; set; }
+
+        [Option("append-path", Group = "config", HelpText = "Switch of Append Windows PATH to $PATH")]
+        public bool? AppendPath { get; set; }
+
+        [Option("mount-drive", Group = "config", HelpText = "Switch of Mount drives")]
+        public bool? MountDrive { get; set; }
 
         public int Run()
         {
-            Program.Distro.SetDefaultUser(DefaultUser);
+            var config = Program.Distro.Config;
+            if (DefaultUser != null)
+                config.DefaultUid = Program.Distro.QueryUid(DefaultUser);
+            else if (DefaultUid != null)
+                config.DefaultUid = DefaultUid.Value;
+            if (AppendPath != null)
+                config.AppendPath = AppendPath.Value;
+            if (MountDrive != null)
+                config.MountDrive = MountDrive.Value;
+            Program.Distro.Config = config;
+            return 0;
+        }
+    }
+
+    [Verb("get", HelpText = "Get settings for this distribution.")]
+    class GetVerb : IVerb
+    {
+        [Option("user-uid", Group = "get", SetName = "useruid", HelpText = "Get the user uid by username.")]
+        public string? UserUid { get; set; }
+
+        [Option("default-uid", Group = "get", SetName = "uid", HelpText = "Get the default user uid in this distribution.")]
+        public bool DefaultUid { get; set; }
+
+        [Option("append-path", Group = "get", SetName = "append", HelpText = "Get status of Append Windows PATH to $PATH")]
+        public bool AppendPath { get; set; }
+
+        [Option("mount-drive", Group = "get", SetName = "mount", HelpText = "Get status of Mount drives")]
+        public bool MountDrive { get; set; }
+
+        public int Run()
+        {
+            if (UserUid != null)
+                Console.WriteLine(Program.Distro.QueryUid(UserUid));
+            else
+            {
+                var config = Program.Distro.Config;
+                if (DefaultUid)
+                    Console.WriteLine(config.DefaultUid);
+                else if (AppendPath)
+                    Console.WriteLine(config.AppendPath);
+                else if (MountDrive)
+                    Console.WriteLine(config.MountDrive);
+            }
             return 0;
         }
     }

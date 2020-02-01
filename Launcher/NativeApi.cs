@@ -38,8 +38,8 @@ namespace Launcher
         [DllImport("wslapi.dll", CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = false)]
         public static extern void WslConfigureDistribution(string distributionName, uint defaultUID, WSL_DISTRIBUTION_FLAGS wslDistributionFlags);
 
-        //[DllImport("wslapi.dll", CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = false)]
-        //public static extern void WslGetDistributionConfiguration(string distributionName, out uint distributionVersion, out uint defaultUID, out WSL_DISTRIBUTION_FLAGS wslDistributionFlags, [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr, SizeParamIndex = 5)] out string[] defaultEnvironmentVariables, out uint defaultEnvironmentVariableCount);
+        [DllImport("wslapi.dll", CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = false)]
+        public static extern void WslGetDistributionConfiguration(string distributionName, out uint distributionVersion, out uint defaultUID, out WSL_DISTRIBUTION_FLAGS wslDistributionFlags, [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr, SizeParamIndex = 5)] out string[] defaultEnvironmentVariables, out uint defaultEnvironmentVariableCount);
 
         [DllImport("wslapi.dll", CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = false)]
         public static extern void WslLaunchInteractive(string distributionName, string? command, [MarshalAs(UnmanagedType.Bool)] bool useCurrentWorkingDirectory, out uint exitCode);
@@ -50,6 +50,11 @@ namespace Launcher
         [DllImport("kernel32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool CreatePipe(out SafeFileHandle hReadPipe, out SafeFileHandle hWritePipe, ref SECURITY_ATTRIBUTES lpPipeAttributes, uint nSize);
+
+
+        public const int STD_INPUT_HANDLE = -10;
+        public const int STD_OUTPUT_HANDLE = -11;
+        public const int STD_ERROR_HANDLE = -12;
 
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern SafeFileHandle GetStdHandle(int nStdHandle);
