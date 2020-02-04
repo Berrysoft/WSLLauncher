@@ -1,20 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using CommandLine;
-
-#pragma warning disable 8618
 
 namespace Launcher
 {
     class Program
     {
-        public static Distribution Distro;
+        public static Distribution Distro = new Distribution(AppDomain.CurrentDomain.FriendlyName);
 
         static int Main(string[] args)
         {
-            string name = AppDomain.CurrentDomain.FriendlyName;
-            Distro = new Distribution(name);
             if (args.Length == 0)
             {
                 return RunVerb(new RunVerb() { Login = true });
@@ -30,13 +25,14 @@ namespace Launcher
             }
             catch (Exception e)
             {
-                switch ((uint)e.HResult)
+                switch (e.HResult)
                 {
-                    case 0x800700B7: // ERROR_ALREADY_EXISTS
+                    case NativeApi.HRESULT_ERROR_ALREADY_EXISTS:
                         Console.WriteLine("The distribution installation has become corrupted.");
                         Console.WriteLine("Please select Reset from App Settings or uninstall and reinstall the app.");
                         break;
-                    case 0x8007019E: // ERROR_LINUX_SUBSYSTEM_NOT_PRESENT
+                    case NativeApi.HRESULT_ERROR_LINUX_SUBSYSTEM_NOT_PRESENT:
+                    case NativeApi.COR_E_DLLNOTFOUND:
                         Console.WriteLine("The Windows Subsystem for Linux optional component is not enabled. Please enable it and try again.");
                         Console.WriteLine("See https://aka.ms/wslinstall for details.");
                         break;
@@ -54,10 +50,7 @@ namespace Launcher
 
         static int RunError(IEnumerable<Error> errs)
         {
-            if (errs.Any(e => e.Tag == ErrorType.HelpRequestedError || e.Tag == ErrorType.HelpVerbRequestedError || e.Tag == ErrorType.VersionRequestedError))
-                return 0;
-            else
-                return 1;
+            return 1;
         }
     }
 
@@ -73,7 +66,7 @@ namespace Launcher
         public bool Root { get; set; }
 
         [Option("file", Default = "rootfs.tar.gz", HelpText = "The distro tarball.")]
-        public string File { get; set; }
+        public string File { get; set; } = "rootfs.tar.gz";
 
         public int Run()
         {
@@ -101,10 +94,10 @@ namespace Launcher
         [Option("default-uid", Group = "config", SetName = "uid", HelpText = "Sets the default user with uid. This must be an existing user.")]
         public uint? DefaultUid { get; set; }
 
-        [Option("append-path", Group = "config", HelpText = "Switch of Append Windows PATH to $PATH")]
+        [Option("append-path", Group = "config", HelpText = "Switch of Append Windows PATH to $PATH.")]
         public bool? AppendPath { get; set; }
 
-        [Option("mount-drive", Group = "config", HelpText = "Switch of Mount drives")]
+        [Option("mount-drive", Group = "config", HelpText = "Switch of Mount drives.")]
         public bool? MountDrive { get; set; }
 
         public int Run()
@@ -132,11 +125,14 @@ namespace Launcher
         [Option("default-uid", Group = "get", SetName = "uid", HelpText = "Get the default user uid in this distribution.")]
         public bool DefaultUid { get; set; }
 
-        [Option("append-path", Group = "get", SetName = "append", HelpText = "Get status of Append Windows PATH to $PATH")]
+        [Option("append-path", Group = "get", SetName = "append", HelpText = "Get status of Append Windows PATH to $PATH.")]
         public bool AppendPath { get; set; }
 
-        [Option("mount-drive", Group = "get", SetName = "mount", HelpText = "Get status of Mount drives")]
+        [Option("mount-drive", Group = "get", SetName = "mount", HelpText = "Get status of Mount drives.")]
         public bool MountDrive { get; set; }
+
+        [Option("default-env", Group = "get", SetName = "env", HelpText = "Get default environment variables.")]
+        public bool DefaultEnv { get; set; }
 
         public int Run()
         {
@@ -151,6 +147,13 @@ namespace Launcher
                     Console.WriteLine(config.AppendPath);
                 else if (MountDrive)
                     Console.WriteLine(config.MountDrive);
+                else if (DefaultEnv)
+                {
+                    foreach (string e in config.EnvVariables)
+                    {
+                        Console.WriteLine(e);
+                    }
+                }
             }
             return 0;
         }
@@ -171,5 +174,3 @@ namespace Launcher
         }
     }
 }
-
-#pragma warning restore 8618

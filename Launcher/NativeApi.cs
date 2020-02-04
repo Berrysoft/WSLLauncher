@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 
 namespace Launcher
@@ -30,7 +29,7 @@ namespace Launcher
         public static extern void WslConfigureDistribution(string distributionName, uint defaultUID, WSL_DISTRIBUTION_FLAGS wslDistributionFlags);
 
         [DllImport("wslapi.dll", CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = false)]
-        public static extern void WslGetDistributionConfiguration(string distributionName, out uint distributionVersion, out uint defaultUID, out WSL_DISTRIBUTION_FLAGS wslDistributionFlags, [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr, SizeParamIndex = 5)] out string[] defaultEnvironmentVariables, out uint defaultEnvironmentVariableCount);
+        public static extern void WslGetDistributionConfiguration(string distributionName, out uint distributionVersion, out uint defaultUID, out WSL_DISTRIBUTION_FLAGS wslDistributionFlags, [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr, SizeParamIndex = 5)] out string[] defaultEnvironmentVariables, out uint defaultEnvironmentVariableCount);
 
         [DllImport("wslapi.dll", CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = false)]
         public static extern void WslLaunchInteractive(string distributionName, string? command, [MarshalAs(UnmanagedType.Bool)] bool useCurrentWorkingDirectory, out uint exitCode);
@@ -51,5 +50,9 @@ namespace Launcher
         [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool GetExitCodeProcess(SafeHandle hProcess, out uint lpExitCode);
+
+        public const int HRESULT_ERROR_ALREADY_EXISTS = unchecked((int)0x800700B7);
+        public const int HRESULT_ERROR_LINUX_SUBSYSTEM_NOT_PRESENT = unchecked((int)0x8007019E);
+        public const int COR_E_DLLNOTFOUND = unchecked((int)0x80131524);
     }
 }

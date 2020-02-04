@@ -91,12 +91,12 @@ namespace Launcher
             }
         }
 
-        private (uint DefaultUid, WSL_DISTRIBUTION_FLAGS Flags) GetConfigure()
+        private (uint DefaultUid, WSL_DISTRIBUTION_FLAGS Flags, string[] Env) GetConfigure()
         {
             try
             {
-                NativeApi.WslGetDistributionConfiguration(Name, out _, out uint uid, out WSL_DISTRIBUTION_FLAGS flags, out _, out _);
-                return (uid, flags);
+                NativeApi.WslGetDistributionConfiguration(Name, out _, out uint uid, out WSL_DISTRIBUTION_FLAGS flags, out string[] env, out _);
+                return (uid, flags, env);
             }
             catch (Exception e)
             {
@@ -109,12 +109,13 @@ namespace Launcher
         {
             get
             {
-                var (uid, flags) = GetConfigure();
+                var (uid, flags, env) = GetConfigure();
                 return new DistributionConfig
                 {
                     DefaultUid = uid,
                     AppendPath = (flags & WSL_DISTRIBUTION_FLAGS.APPEND_NT_PATH) != 0,
-                    MountDrive = (flags & WSL_DISTRIBUTION_FLAGS.ENABLE_DRIVE_MOUNTING) != 0
+                    MountDrive = (flags & WSL_DISTRIBUTION_FLAGS.ENABLE_DRIVE_MOUNTING) != 0,
+                    EnvVariables = env
                 };
             }
             set
@@ -145,7 +146,7 @@ namespace Launcher
             return true;
         }
 
-        public unsafe uint QueryUid(string username)
+        public uint QueryUid(string username)
         {
             using (var readPipe = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable, 0))
             using (var writePipe = new AnonymousPipeClientStream(PipeDirection.Out, readPipe.ClientSafePipeHandle))
@@ -210,5 +211,6 @@ namespace Launcher
         public uint DefaultUid;
         public bool AppendPath;
         public bool MountDrive;
+        public string[] EnvVariables;
     }
 }
