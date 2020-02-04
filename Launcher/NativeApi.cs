@@ -14,15 +14,6 @@ namespace Launcher
         DEFAULT = ENABLE_INTEROP | APPEND_NT_PATH | ENABLE_DRIVE_MOUNTING
     }
 
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct SECURITY_ATTRIBUTES
-    {
-        public int nLength;
-        public IntPtr lpSecurityDescriptor;
-        [MarshalAs(UnmanagedType.Bool)]
-        public bool bInheritHandle;
-    }
-
     internal static class NativeApi
     {
         [DllImport("wslapi.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
@@ -45,24 +36,19 @@ namespace Launcher
         public static extern void WslLaunchInteractive(string distributionName, string? command, [MarshalAs(UnmanagedType.Bool)] bool useCurrentWorkingDirectory, out uint exitCode);
 
         [DllImport("wslapi.dll", CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = false)]
-        public static extern void WslLaunch(string distributionName, string? command, [MarshalAs(UnmanagedType.Bool)] bool useCurrentWorkingDirectory, SafeFileHandle stdIn, SafeFileHandle stdOut, SafeFileHandle stdErr, out SafeProcessHandle process);
-
-        [DllImport("kernel32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool CreatePipe(out SafeFileHandle hReadPipe, out SafeFileHandle hWritePipe, ref SECURITY_ATTRIBUTES lpPipeAttributes, uint nSize);
-
+        public static extern void WslLaunch(string distributionName, string? command, [MarshalAs(UnmanagedType.Bool)] bool useCurrentWorkingDirectory, SafeHandle stdIn, SafeHandle stdOut, SafeHandle stdErr, out SafeProcessHandle process);
 
         public const int STD_INPUT_HANDLE = -10;
         public const int STD_OUTPUT_HANDLE = -11;
         public const int STD_ERROR_HANDLE = -12;
 
-        [DllImport("kernel32.dll", SetLastError = true)]
+        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
         public static extern SafeFileHandle GetStdHandle(int nStdHandle);
 
-        [DllImport("kernel32.dll", SetLastError = true)]
+        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
         public static extern uint WaitForSingleObject(SafeHandle hHandle, uint dwMilliseconds = uint.MaxValue);
 
-        [DllImport("kernel32.dll", SetLastError = true)]
+        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool GetExitCodeProcess(SafeHandle hProcess, out uint lpExitCode);
     }

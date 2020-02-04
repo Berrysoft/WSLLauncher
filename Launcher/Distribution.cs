@@ -1,10 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.IO.Pipes;
+using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 
 namespace Launcher
 {
-    class Distribution
+    public class Distribution
     {
         public string Name { get; set; }
 
@@ -35,7 +37,7 @@ namespace Launcher
             }
         }
 
-        private SafeProcessHandle Launch(string? command, bool useCurrentWorkingDirectory, SafeFileHandle stdIn, SafeFileHandle stdOut, SafeFileHandle stdErr)
+        private SafeProcessHandle Launch(string? command, bool useCurrentWorkingDirectory, SafeHandle stdIn, SafeHandle stdOut, SafeHandle stdErr)
         {
             try
             {
@@ -145,23 +147,16 @@ namespace Launcher
 
         public unsafe uint QueryUid(string username)
         {
-            SECURITY_ATTRIBUTES sa = new SECURITY_ATTRIBUTES
+            using (var readPipe = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable, 0))
+            using (var writePipe = new AnonymousPipeClientStream(PipeDirection.Out, readPipe.ClientSafePipeHandle))
             {
-                nLength = sizeof(SECURITY_ATTRIBUTES),
-                lpSecurityDescriptor = IntPtr.Zero,
-                bInheritHandle = true
-            };
-            if (NativeApi.CreatePipe(out SafeFileHandle readPipe, out SafeFileHandle writePipe, ref sa, 0))
-            {
-                var child = Launch("/usr/bin/id -u " + username, true, NativeApi.GetStdHandle(NativeApi.STD_INPUT_HANDLE), writePipe, NativeApi.GetStdHandle(NativeApi.STD_ERROR_HANDLE));
+                var child = Launch("/usr/bin/id -u " + username, true, NativeApi.GetStdHandle(NativeApi.STD_INPUT_HANDLE), writePipe.SafePipeHandle, NativeApi.GetStdHandle(NativeApi.STD_ERROR_HANDLE));
                 NativeApi.WaitForSingleObject(child);
-                NativeApi.GetExitCodeProcess(child, out uint exitCode);
-                if (exitCode != 0)
+                if (!NativeApi.GetExitCodeProcess(child, out uint exitCode) || exitCode != 0)
                 {
                     throw new ArgumentException();
                 }
-                using (var readStream = new FileStream(readPipe, FileAccess.Read))
-                using (var reader = new StreamReader(readStream))
+                using (var reader = new StreamReader(readPipe))
                 {
                     string? line = reader.ReadLine();
                     return line != null ? uint.Parse(line) : throw new ArgumentException();
@@ -210,7 +205,7 @@ namespace Launcher
         }
     }
 
-    struct DistributionConfig
+    public struct DistributionConfig
     {
         public uint DefaultUid;
         public bool AppendPath;

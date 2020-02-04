@@ -41,7 +41,11 @@ namespace Launcher
                         Console.WriteLine("See https://aka.ms/wslinstall for details.");
                         break;
                     default:
+#if DEBUG
+                        Console.WriteLine(e);
+#else
                         Console.WriteLine("Error: 0x{0:X} {1}", e.HResult, e.Message);
+#endif
                         break;
                 }
                 return 1;
