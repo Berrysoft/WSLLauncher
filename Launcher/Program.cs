@@ -11,6 +11,16 @@ namespace Launcher
 
         static int Main(string[] args)
         {
+            if (Distro.Name == "Launcher")
+            {
+                Console.WriteLine("This launcher should not be built and run directly.");
+                Console.WriteLine("Instead, change the AssemblyName property of the project to distro name and rebuild it.");
+                return 1;
+            }
+            if (!Distro.Registered)
+            {
+                return RunVerb(new InstallVerb());
+            }
             if (args.Length == 0)
             {
                 if (!Console.IsInputRedirected)
@@ -45,11 +55,7 @@ namespace Launcher
                         Console.WriteLine("See https://aka.ms/wslinstall for details.");
                         break;
                     default:
-#if DEBUG
                         Console.WriteLine(e);
-#else
-                        Console.WriteLine("Error: 0x{0:X} {1}", e.HResult, e.Message);
-#endif
                         break;
                 }
                 return 1;
