@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CommandLine;
 
 namespace Launcher
@@ -12,9 +13,16 @@ namespace Launcher
         {
             if (args.Length == 0)
             {
-                return RunVerb(new RunVerb() { Login = true });
+                if (!Console.IsInputRedirected)
+                {
+                    return RunVerb(new RunVerb() { Login = true });
+                }
+                else
+                {
+                    args = new string[] { "run" };
+                }
             }
-            return Parser.Default.ParseArguments<InstallVerb, UninstallVerb, ConfigVerb, GetVerb, RunVerb>(args).MapResult<IVerb, int>(RunVerb, RunError);
+            return Parser.Default.ParseArguments<InstallVerb, UninstallVerb, ConfigVerb, GetVerb, RunVerb, RunAliasVerb>(args).MapResult<IVerb, int>(RunVerb, RunError);
         }
 
         static int RunVerb(IVerb verb)
@@ -175,12 +183,24 @@ namespace Launcher
         [Value(0)]
         public IEnumerable<string>? Command { get; set; }
 
-        [Option("login", HelpText = "Use current directory.")]
+        [Option("login", HelpText = "Use home directory.")]
         public bool Login { get; set; }
 
         public int Run()
         {
-            return (int)Program.Distro.LaunchInteractive(Command != null ? string.Join(' ', Command) : string.Empty, !Login);
+            if ((Command?.Any()).GetValueOrDefault() || !Console.IsInputRedirected)
+            {
+                return (int)Program.Distro.LaunchInteractive(Command != null ? string.Join(' ', Command) : string.Empty, !Login);
+            }
+            else
+            {
+                return (int)Program.Distro.LaunchInteractive(Console.In.ReadToEnd().Replace("\r\n", "\n"), !Login);
+            }
         }
+    }
+
+    [Verb("-c", HelpText = "Same with run.")]
+    class RunAliasVerb : RunVerb
+    {
     }
 }
