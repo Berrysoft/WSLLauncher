@@ -94,6 +94,9 @@ namespace Launcher
         [Option("default-uid", Group = "config", SetName = "uid", HelpText = "Sets the default user with uid. This must be an existing user.")]
         public uint? DefaultUid { get; set; }
 
+        [Option("interop", Group = "config", HelpText = "Switch of interop with Windows processes.")]
+        public bool? Interop { get; set; }
+
         [Option("append-path", Group = "config", HelpText = "Switch of Append Windows PATH to $PATH.")]
         public bool? AppendPath { get; set; }
 
@@ -107,6 +110,8 @@ namespace Launcher
                 config.DefaultUid = Program.Distro.QueryUid(DefaultUser);
             else if (DefaultUid != null)
                 config.DefaultUid = DefaultUid.Value;
+            if (Interop != null)
+                config.Interop = Interop.Value;
             if (AppendPath != null)
                 config.AppendPath = AppendPath.Value;
             if (MountDrive != null)
@@ -124,6 +129,9 @@ namespace Launcher
 
         [Option("default-uid", Group = "get", SetName = "uid", HelpText = "Get the default user uid in this distribution.")]
         public bool DefaultUid { get; set; }
+
+        [Option("interop", Group = "get", SetName = "interop", HelpText = "Get status of interop with Windows processes.")]
+        public bool Interop { get; set; }
 
         [Option("append-path", Group = "get", SetName = "append", HelpText = "Get status of Append Windows PATH to $PATH.")]
         public bool AppendPath { get; set; }
@@ -143,6 +151,8 @@ namespace Launcher
                 var config = Program.Distro.Config;
                 if (DefaultUid)
                     Console.WriteLine(config.DefaultUid);
+                else if (Interop)
+                    Console.WriteLine(config.Interop);
                 else if (AppendPath)
                     Console.WriteLine(config.AppendPath);
                 else if (MountDrive)

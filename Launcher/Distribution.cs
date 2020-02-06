@@ -113,6 +113,7 @@ namespace Launcher
                 return new DistributionConfig
                 {
                     DefaultUid = uid,
+                    Interop = (flags & WSL_DISTRIBUTION_FLAGS.ENABLE_INTEROP) != 0,
                     AppendPath = (flags & WSL_DISTRIBUTION_FLAGS.APPEND_NT_PATH) != 0,
                     MountDrive = (flags & WSL_DISTRIBUTION_FLAGS.ENABLE_DRIVE_MOUNTING) != 0,
                     EnvVariables = env
@@ -120,7 +121,8 @@ namespace Launcher
             }
             set
             {
-                WSL_DISTRIBUTION_FLAGS flags = WSL_DISTRIBUTION_FLAGS.ENABLE_INTEROP;
+                WSL_DISTRIBUTION_FLAGS flags = WSL_DISTRIBUTION_FLAGS.NONE;
+                if (value.Interop) flags |= WSL_DISTRIBUTION_FLAGS.ENABLE_INTEROP;
                 if (value.AppendPath) flags |= WSL_DISTRIBUTION_FLAGS.APPEND_NT_PATH;
                 if (value.MountDrive) flags |= WSL_DISTRIBUTION_FLAGS.ENABLE_DRIVE_MOUNTING;
                 Configure(value.DefaultUid, flags);
@@ -209,6 +211,7 @@ namespace Launcher
     public struct DistributionConfig
     {
         public uint DefaultUid;
+        public bool Interop;
         public bool AppendPath;
         public bool MountDrive;
         public string[] EnvVariables;
