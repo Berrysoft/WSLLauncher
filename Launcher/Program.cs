@@ -1,25 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using CommandLine;
 
 namespace Launcher
 {
     class Program
     {
-        public static Distribution Distro = new Distribution(AppDomain.CurrentDomain.FriendlyName);
+        public static Distribution Distro = new Distribution(Assembly.GetExecutingAssembly().GetName().Name ?? string.Empty);
 
         static int Main(string[] args)
         {
-            if (Distro.Name == "Launcher")
+            if (string.IsNullOrWhiteSpace(Distro.Name) || Distro.Name == "Launcher")
             {
                 Console.WriteLine("This launcher should not be built and run directly.");
                 Console.WriteLine("Instead, change the AssemblyName property of the project to distro name and rebuild it.");
+                NativeApi.ConsolePause();
                 return 1;
             }
             if (!Distro.Registered)
             {
-                return RunVerb(new InstallVerb());
+                int ret = RunVerb(new InstallVerb());
+                NativeApi.ConsolePause();
+                return ret;
             }
             if (args.Length == 0)
             {
@@ -194,9 +198,14 @@ namespace Launcher
 
         public int Run()
         {
+#if NETCOREAPP
+            const char separater = ' ';
+#else
+            const string separater = " ";
+#endif
             if ((Command?.Any()).GetValueOrDefault() || !Console.IsInputRedirected)
             {
-                return (int)Program.Distro.LaunchInteractive(Command != null ? string.Join(' ', Command) : string.Empty, !Login);
+                return (int)Program.Distro.LaunchInteractive(Command != null ? string.Join(separater, Command) : string.Empty, !Login);
             }
             else
             {

@@ -54,5 +54,13 @@ namespace Launcher
         public const int HRESULT_ERROR_ALREADY_EXISTS = unchecked((int)0x800700B7);
         public const int HRESULT_ERROR_LINUX_SUBSYSTEM_NOT_PRESENT = unchecked((int)0x8007019E);
         public const int COR_E_DLLNOTFOUND = unchecked((int)0x80131524);
+
+        [DllImport("ucrtbase.dll", CharSet = CharSet.Unicode, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int _wsystem(string? command);
+
+        public static void ConsolePause()
+        {
+            _wsystem("pause");
+        }
     }
 }
