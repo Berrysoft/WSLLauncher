@@ -5,10 +5,10 @@
     <TargetFrameworks>netcoreapp3.1;net48</TargetFrameworks>
     <Nullable>enable</Nullable>
     <LangVersion>8.0</LangVersion>
-    <AssemblyVersion>2.1.7.0</AssemblyVersion>
-    <FileVersion>2.1.7.0</FileVersion>
+    <AssemblyVersion>2.1.8.0</AssemblyVersion>
+    <FileVersion>2.1.8.0</FileVersion>
     <Copyright>Copyright (C) 2020 Berrysoft</Copyright>
-    <Version>2.1.7</Version>
+    <Version>2.1.8</Version>
   </PropertyGroup>
 
   <ItemGroup>
